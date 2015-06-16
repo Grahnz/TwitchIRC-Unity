@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,8 +14,7 @@ public class TwitchIRC : MonoBehaviour
     public class MsgEvent : UnityEngine.Events.UnityEvent<string, string> { }
     public MsgEvent messageRecievedEvent = new MsgEvent();
 
-    [HideInInspector()]
-    public string buffer;
+    private string buffer;
     private bool stopThread = false;
     private Queue<string> commandQueue = new Queue<string>();
     private List<KeyValuePair<string, string>> chatMsgs = new List<KeyValuePair<string, string>>();
@@ -39,13 +38,15 @@ public class TwitchIRC : MonoBehaviour
         output.WriteLine("NICK " + nickName.ToLower());
         output.Flush();
 
+        System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+        stopWatch.Start();
         //Process each line received from irc server
         while (!stopThread)
         {
             buffer = input.ReadLine();
             if (buffer == null)
                 continue;
-            //Debug.Log(buffer);
+
             //Send pong reply to any ping messages
             if (buffer.StartsWith("PING "))
             {
@@ -65,16 +66,26 @@ public class TwitchIRC : MonoBehaviour
                 OnMessageRecieved(user, msg);
                 chatMsgs.Add(new KeyValuePair<string, string>(user, msg));
             }
-            //do we have any commands to send?
+
             lock (commandQueue)
             {
-                if (commandQueue.Count > 0)
+                if (commandQueue.Count > 0) //do we have any commands to send?
                 {
-                    output.WriteLine(commandQueue.Peek());
-                    output.Flush();
-                    commandQueue.Dequeue();
+                    //have enough time passed since we last sent a message/command?
+                    if (stopWatch.ElapsedMilliseconds > 1750)
+                    {
+                        //send msg.
+                        output.WriteLine(commandQueue.Peek());
+                        output.Flush();
+                        //remove msg from queue.
+                        commandQueue.Dequeue();
+                        //restart stopwatch.
+                        stopWatch.Reset();
+                        stopWatch.Start();
+                    }
                 }
             }
+
             //After server sends 001 command, we can join a channel
             if (buffer.Split(' ')[1] == "001")
             {
@@ -99,7 +110,7 @@ public class TwitchIRC : MonoBehaviour
     }
     void OnMessageRecieved(string nick, string msg)
     {
-        Debug.Log(nick + ": " + msg);
+        //Debug.Log(nick + ": " + msg);
     }
 
     //MonoBehaviour Events.
