@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class TwitchIRC : MonoBehaviour
 {
-    public string oath;
+    public string oauth;
     public string nickName;
     public string channelName;
     private string server = "irc.twitch.tv";
@@ -35,7 +35,7 @@ public class TwitchIRC : MonoBehaviour
         output = new System.IO.StreamWriter(sock.GetStream());
 
         //Send PASS & NICK.
-        output.WriteLine("PASS " + oath);
+        output.WriteLine("PASS " + oauth);
         output.WriteLine("NICK " + nickName.ToLower());
         output.Flush();
 
