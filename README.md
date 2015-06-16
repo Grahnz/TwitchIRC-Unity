@@ -8,7 +8,7 @@ In order to connect to Twitch IRC, you must have three pieces of information:
 3. Oauth token from API or from a site using it: www.twitchapps.com/tmi
 
 ## Usage
-Enter your twitch name, oath token and the name of the channel you want to join in the inspector of TwitchIRC.
+Enter your twitch name, oauth token and the name of the channel you want to join in the inspector of TwitchIRC.
 Drop a component that utilizes TwitchIRC.cs or try the TwitchChatExample.cs chat component.
 
 ## API
