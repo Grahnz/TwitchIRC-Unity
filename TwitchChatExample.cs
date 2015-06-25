@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,23 +14,36 @@ public class TwitchChatExample : MonoBehaviour
     public UnityEngine.UI.ScrollRect scrollRect;
     private TwitchIRC IRC;
     //when message is recieved from IRC-server or our own message.
-    void OnChatMsgRecieved(string user, string msg)
+    void OnChatMsgRecieved(string msg)
     {
+        //parse from buffer.
+        int msgIndex = msg.IndexOf("PRIVMSG #");
+        string msgString = msg.Substring(msgIndex + IRC.channelName.Length + 11);
+        string user = msg.Substring(1, msg.IndexOf('!') - 1);
+
+        //remove old messages for performance reasons.
         if (messages.Count > maxMessages)
         {
             Destroy(messages.First.Value);
             messages.RemoveFirst();
         }
 
+        //add new message.
+        CreateUIMessage(user, msgString);
+    }
+    void CreateUIMessage(string userName, string msgString)
+    {
+        Color32 c = ColorFromUsername(userName);
+        string nameColor = "#" + c.r.ToString("X2") + c.g.ToString("X2") + c.b.ToString("X2");
         GameObject go = new GameObject("twitchMsg");
         var text = go.AddComponent<UnityEngine.UI.Text>();
         var layout = go.AddComponent<UnityEngine.UI.LayoutElement>();
-        go.transform.parent = chatBox;
+        go.transform.SetParent(chatBox);
         messages.AddLast(go);
 
         layout.minHeight = 20f;
-        text.text = "<b>" + user + "</b>" + ": " + "<color=#32323E>" + msg + "</color>";
-        text.color = ColorFromUsername(user);
+        text.text = "<color=" + nameColor + "><b>" + userName + "</b></color>" + ": " + msgString;
+        text.color = Color.black;
         text.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
         scrollRect.velocity = new Vector2(0, 1000f);
     }
@@ -39,9 +52,8 @@ public class TwitchChatExample : MonoBehaviour
     {
         if (inputField.text.Length > 0)
         {
-            IRC.SendMessage(inputField.text);
-            //invoke onchatmsgrecieved because the IRC server wont send the message to the sending client.
-            OnChatMsgRecieved(IRC.nickName, inputField.text); //for local GUI only.
+            IRC.SendMsg(inputField.text); //send message.
+            CreateUIMessage(IRC.nickName, inputField.text); //create ui element.
             inputField.text = "";
         }
     }
@@ -54,6 +66,7 @@ public class TwitchChatExample : MonoBehaviour
     void Start()
     {
         IRC = this.GetComponent<TwitchIRC>();
+        //IRC.SendCommand("CAP REQ :twitch.tv/tags"); //register for additional data such as emote-ids, name color etc.
         IRC.messageRecievedEvent.AddListener(OnChatMsgRecieved);
     }
 }
