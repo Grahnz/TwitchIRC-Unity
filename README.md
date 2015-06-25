@@ -14,14 +14,14 @@ Drop a component that utilizes TwitchIRC.cs or try the TwitchChatExample.cs chat
 ## API
 Sending:
 
-- TwitchIRC.SendMessage(string msg)
+- TwitchIRC.SendMsg(string msg)
 - TwitchIRC.SendCommand(string cmd)
 
 Reading:
  Add a listener via:
-- TwitchIRC.messageRecievedEvent.AddListener(function)
+- TwitchIRC.messageRecievedEvent.AddListener(function(string))
 
 For an example see TwitchChatExample.cs
 
 ## Known issues
-- If you send more than 20 commands or messages to the server within a 30 second period, you will get locked out for 8 hours automatically. These are **not** lifted so please be careful when working with IRC!
+- Please tell me if you find any!
