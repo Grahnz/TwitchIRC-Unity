@@ -1,3 +1,4 @@
+![img](http://johangrahn.se/wp-content/uploads/2015/06/twitchChat.jpg)
 # TwitchIRC.cs 
 Is a lightweight IRC client component for use with the Unity Engine.
 ## Prerequisites
